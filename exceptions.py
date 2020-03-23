@@ -1,3 +1,7 @@
+"""Custom django rest exception."""
+
+# Maintained by Kelvin Muchiri: https://github.com/kelvin-muchiri/django-rest-custom-exception
+
 from rest_framework.views import exception_handler
 
 REJECTED_FIELDS = ['non_field_errors', 'detail']
@@ -64,10 +68,15 @@ def custom_exception_handler(exc, context):
         response.data = {}
         errors = []
 
-        for field, value in response_data_items.items():
-            errors += build_errors(field, value)
+        if isinstance(response_data_items, list):
+            for item in response_data_items:
+                for field, value in item.items():
+                    errors += build_errors(field, value)
+
+        elif isinstance(response_data_items, dict):
+            for field, value in response_data_items.items():
+                errors += build_errors(field, value)
 
         response.data['errors'] = errors
 
     return response
-
